@@ -241,7 +241,7 @@ handle_cast(_Msg, State) ->
 %% any other message than a synchronous or asynchronous request (or a system message). 
 %% @end
 %%------------------------------------------------------------------------------
-handle_info({'DOWN', Ref, process, PID, _Reason}, State) ->
+handle_info({'DOWN', _Ref, process, PID, _Reason}, State) ->
 	#process_group_state{table_id = Dict} = State,
 	NewDict = dict:erase(PID, Dict),
 	NewState = State#process_group_state{table_id = NewDict},
