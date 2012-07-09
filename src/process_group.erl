@@ -82,8 +82,9 @@ create(GroupName) ->
 %% @doc Delete process group.
 -spec delete(GroupName :: atom()) -> ok.
 delete(GroupName) ->
-	ok = supervisor:terminate_child(?SUPERVISOR, GroupName),
-	ok = supervisor:delete_child(?SUPERVISOR, GroupName).
+	_ = supervisor:terminate_child(?SUPERVISOR, GroupName),
+	_ = supervisor:delete_child(?SUPERVISOR, GroupName),
+	ok.
 
 %% @doc Join calling process to given group.
 -spec join(GroupName :: atom()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
