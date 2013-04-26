@@ -24,6 +24,7 @@
 	leave/1,
 	leave/2,
 	get_members/1,
+	count_members/1,
 	notify_members/2,
 	which_groups/0,
 	
@@ -126,6 +127,16 @@ get_members(GroupName) ->
 			{error, {no_such_group, GroupName}}
 	end.
 
+%% @doc Count members of a given group.
+-spec count_members(GroupName :: atom()) -> Result :: non_neg_integer() | {error, {no_such_group, GroupName :: atom()}}.
+count_members(GroupName) ->
+	try
+		gen_server:call(GroupName, count_members)
+	catch
+		exit:{noproc, _} ->
+			{error, {no_such_group, GroupName}}
+	end.
+
 %% @doc Send notification to all members of a given group.
 -spec notify_members(GroupName :: atom(), Notification :: any()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
 notify_members(GroupName, Notification) ->
@@ -204,6 +215,10 @@ handle_call(get_members, _From, State) ->
 	#process_group_state{table_id = Dict} = State,
 	PIDs = [PID || PID <- dict:fetch_keys(Dict)],
 	{reply, PIDs, State};
+handle_call(count_members, _From, State) ->
+	#process_group_state{table_id = Dict} = State,
+	Size = dict:size(Dict),
+	{reply, Size, State};
 handle_call({notify_members, Notification}, _From, State) ->
 	#process_group_state{table_id = Dict} = State,
 	_ = [PID ! Notification || PID <- dict:fetch_keys(Dict)],
