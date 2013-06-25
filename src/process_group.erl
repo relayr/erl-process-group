@@ -48,7 +48,7 @@
 %%------------------------------------------------------------------------------
 -record(process_group_state, {
 	name		:: atom(),
-	table_id	:: dict()
+	table_id	:: ets:tid()
 }).
 
 %%------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ which_groups() ->
 %% @end
 %%------------------------------------------------------------------------------
 init([GroupName]) ->
-	TID = dict:new(),
+	TID = ets:new(GroupName, [protected, set, named_table]),
 	State = #process_group_state{name = GroupName, table_id = TID},
     {ok, State}.
 
@@ -194,34 +194,32 @@ init([GroupName]) ->
 %% @end
 %%------------------------------------------------------------------------------
 handle_call({join, PID}, _From, State) ->
-	#process_group_state{table_id = Dict} = State,
+	#process_group_state{table_id = TID} = State,
 	Ref = erlang:monitor(process, PID),
-	NewDict = dict:store(PID, Ref, Dict),
-	NewState = State#process_group_state{table_id = NewDict},
-	{reply, ok, NewState};
+	true = ets:insert(TID, {PID, Ref}),
+	{reply, ok, State};
 handle_call({leave, PID}, _From, State) ->
-	#process_group_state{table_id = Dict} = State,
-	NewState =
-		case dict:find(PID, Dict) of
-			error ->
-				State;
-			{ok, Ref} ->
-				true = erlang:demonitor(Ref, [flush]),
-				NewDict = dict:erase(PID, Dict),
-				State#process_group_state{table_id = NewDict}
-		end,
-	{reply, ok, NewState};
+	#process_group_state{table_id = TID} = State,
+	case ets:lookup(TID, PID) of
+		[] ->
+			ok;
+		[{PID, Ref}] ->
+			true = erlang:demonitor(Ref, [flush]),
+			true = ets:delete(TID, PID),
+			ok
+	end,
+	{reply, ok, State};
 handle_call(get_members, _From, State) ->
-	#process_group_state{table_id = Dict} = State,
-	PIDs = [PID || PID <- dict:fetch_keys(Dict)],
+	#process_group_state{table_id = TID} = State,
+	PIDs = [PID || {PID, _Ref} <- ets:tab2list(TID)],
 	{reply, PIDs, State};
 handle_call(count_members, _From, State) ->
-	#process_group_state{table_id = Dict} = State,
-	Size = dict:size(Dict),
+	#process_group_state{table_id = TID} = State,
+	Size = ets:info(TID, size),
 	{reply, Size, State};
 handle_call({notify_members, Notification}, _From, State) ->
-	#process_group_state{table_id = Dict} = State,
-	_ = [PID ! Notification || PID <- dict:fetch_keys(Dict)],
+	#process_group_state{table_id = TID} = State,
+	_ = [PID ! Notification || {PID, _Ref} <- ets:tab2list(TID)],
 	{reply, ok, State};
 handle_call(_Request, _From, State) ->
     {reply, error, State}.
@@ -258,10 +256,9 @@ handle_cast(_Msg, State) ->
 %% @end
 %%------------------------------------------------------------------------------
 handle_info({'DOWN', _Ref, process, PID, _Reason}, State) ->
-	#process_group_state{table_id = Dict} = State,
-	NewDict = dict:erase(PID, Dict),
-	NewState = State#process_group_state{table_id = NewDict},
-	{noreply, NewState};
+	#process_group_state{table_id = TID} = State,
+	true = ets:delete(TID, PID),
+	{noreply, State};
 handle_info(_Info, State) ->
     {noreply, State}.
 
