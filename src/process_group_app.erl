@@ -18,8 +18,7 @@
 %%------------------------------------------------------------------------------
 -export([
 		start/2,
-		stop/1,
-		terminate/0
+		stop/1
 	]).
 
 %%------------------------------------------------------------------------------
@@ -40,6 +39,8 @@
 %% application behaviour functions
 %% =============================================================================
 
+-spec start(normal, Args :: list()) -> {ok, PID :: pid()} | {error, Reason :: any()}.
+%% @private
 %% @doc This is the entry module for your application. It contains the
 %% 		start function and some other stuff. You identify this module
 %% 		using the 'mod' attribute in the .app file.
@@ -50,12 +51,12 @@
 %% 		Type can be 'normal' or {takeover,FromNode}. If the 'start_phases'
 %% 		attribute is present in the .app file, Type can also be {failover,FromNode}.
 %% 		This is an odd compatibility thing.
--spec start(normal, Args :: list()) -> {ok, PID :: pid()} | {error, Reason :: any()}.
 start(normal, _Args) ->
 	process_group_supervisor:start_link().
 
-%% @doc Function used to stop application.
 -spec stop(_State) -> ok.
+%% @private
+%% @doc Function used to stop application.
 stop(_State) ->
     ok.
 
@@ -63,11 +64,6 @@ stop(_State) ->
 %% =============================================================================
 %% Exported functions
 %% =============================================================================
-
-%% @doc Function used to stop application.
--spec terminate() -> no_return().
-terminate() ->
-    halt().
 
 
 %% =============================================================================

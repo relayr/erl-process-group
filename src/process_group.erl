@@ -155,44 +155,14 @@ which_groups() ->
 %% =============================================================================
 %% gen_server behaviour functions
 %% =============================================================================
-%%------------------------------------------------------------------------------
-%% @spec init(Args) ->
-%%			 {ok, State} |
-%%          {ok, State, Timeout} |
-%%          ignore |
-%%          {stop, Reason}
-%% where
-%%		Args = any()
-%%		State = state_record()
-%%		Timeout = int() | infinity
-%%		Reason = any()
-%% @doc Initializing function of gen_server.
-%% @end
-%%------------------------------------------------------------------------------
+
+%% @private
 init([GroupName]) ->
 	TID = ets:new(GroupName, [protected, set, named_table]),
 	State = #process_group_state{name = GroupName, table_id = TID},
     {ok, State}.
 
-%%------------------------------------------------------------------------------
-%% @spec handle_call(Request, From, State) ->
-%%      {reply, Reply, State} |
-%%      {reply, Reply, State, Timeout} |
-%%      {noreply, State} |
-%%      {noreply, State, Timeout} |
-%%      {stop, Reason, Reply, State} |
-%%      {stop, Reason, State}
-%% where
-%%      Request = any()
-%%      From = {pid(), Tag}
-%%      State = sysmon_state_record()
-%%      Reply = any()
-%%      Timeout = int() | infinity
-%%      Reason = any()
-%% @doc Whenever a gen_server receives a request sent using gen_server:call/2,3 
-%% or gen_server:multi_call/2,3,4, this function is called to handle the request. 
-%% @end
-%%------------------------------------------------------------------------------
+%% @private
 handle_call({join, PID}, _From, State) ->
 	#process_group_state{table_id = TID} = State,
 	Ref = erlang:monitor(process, PID),
@@ -224,37 +194,11 @@ handle_call({notify_members, Notification}, _From, State) ->
 handle_call(_Request, _From, State) ->
     {reply, error, State}.
 
-%%------------------------------------------------------------------------------
-%% @spec handle_cast(Msg, State) ->
-%%      {noreply, State} |
-%%      {noreply, State, Timeout} |
-%%      {stop, Reason, State}
-%% where
-%%      Msg = any()
-%%      State = state_record()
-%%      Timeout = int() | infinity
-%%      Reason = any()
-%% @doc Whenever a gen_server receives a request sent using gen_server:cast/2 
-%% or gen_server:abcast/2,3, this function is called to handle the request. 
-%% @end
-%%------------------------------------------------------------------------------
+%% @private
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-%%------------------------------------------------------------------------------
-%% @spec handle_info(Info, State) -> 
-%%          {noreply, State} |
-%%          {noreply, State, Timeout} |
-%%          {stop, Reason, State}
-%% where
-%%      Info = any()
-%%      State = state_record()
-%%      Timeout = int() | infinity
-%%      Reason = any()
-%% @doc This function is called by a gen_server when a timeout occurs or when it receives 
-%% any other message than a synchronous or asynchronous request (or a system message). 
-%% @end
-%%------------------------------------------------------------------------------
+%% @private
 handle_info({'DOWN', _Ref, process, PID, _Reason}, State) ->
 	#process_group_state{table_id = TID} = State,
 	true = ets:delete(TID, PID),
@@ -262,27 +206,11 @@ handle_info({'DOWN', _Ref, process, PID, _Reason}, State) ->
 handle_info(_Info, State) ->
     {noreply, State}.
 
-%%------------------------------------------------------------------------------
-%% @spec terminate(Reason, State) -> ok
-%% where
-%%      Reason = any()
-%%      State = state_record()
-%% @doc Function called when gen_server is going to be shutdown.
-%% @end
-%%------------------------------------------------------------------------------
+%% @private
 terminate(_Reason, _State) ->
     ok.
 
-%%------------------------------------------------------------------------------
-%% @spec code_change(OldVsn, State, Extra) -> {ok, State}
-%% where
-%%      OldVsn = Vsn | {down, Vsn}
-%%      Vsn = any()
-%%      State = state_record()
-%%      Extra = any()
-%% @doc Convert process state when code is changed
-%% @end
-%%------------------------------------------------------------------------------
+%% @private
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 

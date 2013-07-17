@@ -21,21 +21,17 @@
 		 init/1
 		]).
 
+
 %% =============================================================================
 %% Exported functions
 %% =============================================================================
+
 %% @doc Start function for the application's main supervisor.
 -spec start_link() -> {ok, PID :: pid()} | {error, Reason :: any()}.
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%%------------------------------------------------------------------------------
-%% @spec init(Args) -> Result
-%%      Args = []
-%%      Result = {ok,{{RestartStrategy,MaxR,MaxT},[ChildSpec]}} | ignore
-%%      RestartStrategy = one_for_all | one_for_one | rest_for_one | simple_one_for_one
-%%      MaxR = MaxT = int()>=0
-%%      ChildSpec = child_spec()
+%% @private
 %% @doc Whenever a supervisor is started using supervisor:start_link/2,3, 
 %%      this function is called by the new process to find out about restart strategy, 
 %%      maximum restart frequency and child specifications.
@@ -49,8 +45,6 @@ start_link() ->
 %%      No child process is then started during the initialization phase, 
 %%      but all children are assumed to be started dynamically using supervisor:start_child/2.
 %%      The function may also return ignore.
-%% @end
-%%------------------------------------------------------------------------------
 init([]) ->
     SupFlags = {one_for_all, 3, 10},
     {ok, {SupFlags, []}}.
