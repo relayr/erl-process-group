@@ -145,8 +145,10 @@ members_test() ->
 check_members(Group, ExpectedResult) when is_tuple(ExpectedResult) ->
 	?LOOPER(
 		fun() ->
-			Result = process_group:get_members(Group),
-			?assertEqual(ExpectedResult, Result)
+			Result1 = process_group:get_members(Group),
+            Result2 = process_group:count_members(Group),
+            ?assertEqual(ExpectedResult, Result1),
+			?assertEqual(ExpectedResult, Result2)
 		end,
 		[],
 		10,
@@ -156,8 +158,10 @@ check_members(Group, ExpectedResult) when is_tuple(ExpectedResult) ->
 check_members(Group, ExpectedResult) ->
 	?LOOPER(
 		fun() ->
-			Result = process_group:get_members(Group),
-			?assertEqual(lists:sort(ExpectedResult), lists:sort(Result))
+            Result1 = process_group:get_members(Group),
+            Result2 = process_group:count_members(Group),
+			?assertEqual(lists:sort(ExpectedResult), lists:sort(Result1)),
+            ?assertEqual(length(ExpectedResult), Result2)
 		end,
 		[],
 		10,
