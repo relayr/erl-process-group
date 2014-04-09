@@ -93,7 +93,7 @@ join(GroupName) ->
 	join(GroupName, self()).
 
 %% @doc Join process to given group.
--spec join(GroupName :: atom(), PID :: pid()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
+-spec join(GroupName :: atom(), PID :: pid() | atom()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
 join(GroupName, PID) ->
 	try
 		gen_server:call(GroupName, {join, PID})
@@ -108,7 +108,7 @@ leave(GroupName) ->
 	leave(GroupName, self()).
 
 %% @doc Leave process from given group.
--spec leave(GroupName :: atom(), PID :: pid()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
+-spec leave(GroupName :: atom(), PID :: pid() | atom()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
 leave(GroupName, PID) ->
 	try
 		gen_server:call(GroupName, {leave, PID})
@@ -118,7 +118,7 @@ leave(GroupName, PID) ->
 	end.
 
 %% @doc Get all members of a given group.
--spec get_members(GroupName :: atom()) -> Result :: [pid()] | {error, {no_such_group, GroupName :: atom()}}.
+-spec get_members(GroupName :: atom()) -> Result :: [pid() | atom()] | {error, {no_such_group, GroupName :: atom()}}.
 get_members(GroupName) ->
 	try
 		gen_server:call(GroupName, get_members)
