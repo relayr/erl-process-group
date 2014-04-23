@@ -141,7 +141,11 @@ members_test() ->
 	Member2 ! stop,
 	?WAIT_FOR_PROCESS_STOPPED(Member1),
 	?WAIT_FOR_PROCESS_STOPPED(Member2).
-	
+
+%% =============================================================================
+%% Tests
+%% =============================================================================
+
 check_members(Group, ExpectedResult) when is_tuple(ExpectedResult) ->
 	?LOOPER(
 		fun() ->
