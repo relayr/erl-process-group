@@ -190,9 +190,7 @@ handle_call(count_members, _From, State) ->
 handle_call({notify_members, Notification}, _From, State) ->
 	#process_group_state{table_id = TID} = State,
 	_ = [PID ! Notification || {PID, _Ref} <- ets:tab2list(TID)],
-	{reply, ok, State};
-handle_call(_Request, _From, State) ->
-    {reply, error, State}.
+	{reply, ok, State}.
 
 %% @private
 handle_cast(_Msg, State) ->
