@@ -11,8 +11,7 @@
     {registered,[]},
     {applications, [
         kernel,
-        stdlib,
-        prox_misc
+        stdlib
     ]},
     {mod, {process_group_app,[]}}
 ]}.
