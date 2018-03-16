@@ -13,5 +13,6 @@
         kernel,
         stdlib
     ]},
-    {mod, {process_group_app,[]}}
+    {mod, {process_group_app,[]}},
+    {licenses, ["MIT"]}
 ]}.
