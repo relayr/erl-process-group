@@ -3,6 +3,8 @@
 {application, process_group, [
     {description, "Process grouping application."},
     {vsn, "1.0.0"},
+    {licenses, ["MIT"]},
+    {links, [{"GitHub", "https://github.com/relayr/pdm-erl-process-group"}]},
     {modules, [
         process_group_app,
         process_group_supervisor,
@@ -13,6 +15,5 @@
         kernel,
         stdlib
     ]},
-    {mod, {process_group_app,[]}},
-    {licenses, ["MIT"]}
+    {mod, {process_group_app,[]}}
 ]}.
