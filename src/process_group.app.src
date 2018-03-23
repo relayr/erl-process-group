@@ -1,19 +1,11 @@
-%% This is the application resource file (.app file) for the 'base'
-%% application.
-{application, process_group, [
-    {description, "Process grouping application."},
-    {vsn, "1.0.0"},
-    {licenses, ["MIT"]},
-    {links, [{"GitHub", "https://github.com/relayr/pdm-erl-process-group"}]},
-    {modules, [
-        process_group_app,
-        process_group_supervisor,
-        process_group
-    ]},
-    {registered,[]},
-    {applications, [
-        kernel,
-        stdlib
-    ]},
-    {mod, {process_group_app,[]}}
-]}.
+{application,process_group,
+             [{description,"Process grouping application."},
+              {vsn,"2.3.4"},
+              {licenses,["MIT"]},
+              {links,[{"GitHub",
+                       "https://github.com/relayr/pdm-erl-process-group"}]},
+              {modules,[process_group_app,process_group_supervisor,
+                        process_group]},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {mod,{process_group_app,[]}}]}.
