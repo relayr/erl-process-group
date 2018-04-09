@@ -4,8 +4,6 @@
               {licenses,["MIT"]},
               {links,[{"GitHub",
                        "https://github.com/relayr/pdm-erl-process-group"}]},
-              {modules,[process_group_app,process_group_supervisor,
-                        process_group]},
               {registered,[]},
               {applications,[kernel,stdlib]},
               {mod,{process_group_app,[]}}]}.
