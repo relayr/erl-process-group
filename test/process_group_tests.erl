@@ -23,6 +23,7 @@
 
 ?TEST_FUN().
 crud_test() ->
+    setup(),
 	Groups1 = process_group:which_groups() -- ?DEFAULT_GROUPS,
 	?assertEqual([], Groups1),
 	
@@ -58,6 +59,7 @@ crud_test() ->
 
 ?TEST_FUN().
 members_test() ->
+    setup(),
 	MemberFun =
 		fun(Fun, ReceivedMessages) ->
 			receive
@@ -178,5 +180,9 @@ check_received_messages(Member, ExpectedMessages) ->
 	{received_messages, ReceivedMessages} = receive Response -> Response end,
 	?assertEqual(ExpectedMessages, ReceivedMessages),
 	ok.
+
+setup() ->
+    {ok, _} = application:ensure_all_started(process_group),
+    ok.
 
 -endif.
