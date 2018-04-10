@@ -1,6 +1,6 @@
 {application,process_group,
              [{description,"Process grouping application."},
-              {vsn,"1.0.1"},
+              {vsn,"1.0.2"},
               {licenses,["MIT"]},
               {links,[{"GitHub",
                        "https://github.com/relayr/pdm-erl-process-group"}]},
