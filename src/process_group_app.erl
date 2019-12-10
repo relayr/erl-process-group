@@ -17,9 +17,9 @@
 %% application behaviour exports
 %%------------------------------------------------------------------------------
 -export([
-		start/2,
-		stop/1
-	]).
+    start/2,
+    stop/1
+]).
 
 %%------------------------------------------------------------------------------
 %% Function exports
@@ -42,17 +42,17 @@
 -spec start(normal, Args :: list()) -> {ok, PID :: pid()} | {error, Reason :: any()}.
 %% @private
 %% @doc This is the entry module for your application. It contains the
-%% 		start function and some other stuff. You identify this module
-%% 		using the 'mod' attribute in the .app file.
-%% 		The start function is called by the application controller.
-%% 		It normally returns {ok,Pid}, i.e. the same as gen_server and
-%% 		supervisor. Here, we simply call the start function in our supervisor.
-%% 		One can also return {ok, Pid, State}, where State is reused in stop(State).
-%% 		Type can be 'normal' or {takeover,FromNode}. If the 'start_phases'
-%% 		attribute is present in the .app file, Type can also be {failover,FromNode}.
-%% 		This is an odd compatibility thing.
+%%      start function and some other stuff. You identify this module
+%%      using the 'mod' attribute in the .app file.
+%%      The start function is called by the application controller.
+%%      It normally returns {ok,Pid}, i.e. the same as gen_server and
+%%      supervisor. Here, we simply call the start function in our supervisor.
+%%      One can also return {ok, Pid, State}, where State is reused in stop(State).
+%%      Type can be 'normal' or {takeover,FromNode}. If the 'start_phases'
+%%      attribute is present in the .app file, Type can also be {failover,FromNode}.
+%%      This is an odd compatibility thing.
 start(normal, _Args) ->
-	process_group_supervisor:start_link().
+    process_group_supervisor:start_link().
 
 -spec stop(_State) -> ok.
 %% @private
