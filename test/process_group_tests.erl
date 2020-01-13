@@ -11,7 +11,7 @@
 %% Include files
 %%------------------------------------------------------------------------------
 -include("../include/process_group.hrl").
--include_lib("testutils/include/testing.hrl").
+-include_lib("test_utils/include/testing.hrl").
 
 %% =============================================================================
 %% Tests
