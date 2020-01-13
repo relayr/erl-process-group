@@ -11,7 +11,7 @@
 %% Include files
 %%------------------------------------------------------------------------------
 -include("../include/process_group.hrl").
--include_lib("testutils/include/testing.hrl").
+-include_lib("test_utils/include/testing.hrl").
 
 %% =============================================================================
 %% Tests
@@ -21,7 +21,6 @@
 -define(DEFAULT_GROUPS, [default_logger_group,
                          perfmon_logger_group]).
 
-?TEST_FUN().
 crud_test() ->
     setup(),
     Groups1 = process_group:which_groups() -- ?DEFAULT_GROUPS,
@@ -57,7 +56,6 @@ crud_test() ->
     Result6 = process_group:delete(g1),
     ?assertEqual(ok, Result6).
 
-?TEST_FUN().
 members_test() ->
     setup(),
     MemberFun =
