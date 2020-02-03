@@ -18,38 +18,36 @@
 %% =============================================================================
 -ifdef(TEST).
 
--define(DEFAULT_GROUPS, [default_logger_group]).
-
 crud_test() ->
     setup(),
-    Groups1 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Groups1 = process_group:which_groups(),
     ?assertEqual([], Groups1),
 
     Result1 = process_group:create(g1),
     ?assertEqual(ok, Result1),
-    Groups2 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Groups2 = process_group:which_groups(),
     ?assertEqual([g1], Groups2),
 
     Result2 = process_group:create(g1),
     ?assertEqual(ok, Result2),
-    Groups3 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Groups3 = process_group:which_groups(),
     ?assertEqual([g1], Groups3),
 
     Result3 = process_group:create(g2),
     ?assertEqual(ok, Result3),
-    Groups4 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Groups4 = process_group:which_groups(),
     ?assertEqual(2, length(Groups4)),
     ?assert(lists:member(g1, Groups4)),
     ?assert(lists:member(g2, Groups4)),
 
     Result4 = process_group:delete(g1),
     ?assertEqual(ok, Result4),
-    Groups5 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Groups5 = process_group:which_groups(),
     ?assertEqual([g2], Groups5),
 
     Result5 = process_group:delete(g2),
     ?assertEqual(ok, Result5),
-    Groups6 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Groups6 = process_group:which_groups(),
     ?assertEqual([], Groups6),
 
     Result6 = process_group:delete(g1),
@@ -110,7 +108,7 @@ members_test() ->
     ok = check_received_messages(Member1, [notification1, notification3]),
     ok = check_received_messages(Member2, [notification1, notification2]),
 
-    Result4 = process_group:which_groups() -- ?DEFAULT_GROUPS,
+    Result4 = process_group:which_groups(),
     ?assertEqual([g1], Result4),
     Result5 = process_group:notify_members(g1, notification5),
     ?assertEqual(ok, Result5),

@@ -204,7 +204,11 @@ handle_call(count_members, _From, State) ->
     {reply, Size, State};
 handle_call({notify_members, Notification}, _From, State) when is_function(Notification) ->
     #process_group_state{table_id = TID} = State,
-    _ = [catch Notification(Process, ProcessState) || {Process, _Ref, ProcessState} <- ets:tab2list(TID)],
+    _ = [try
+             Notification(Process, ProcessState)
+         catch Class:Reason:Stacktrace ->
+             logger:warning("Failed to notify member ~p: ~p, ~p, ~p", [Process, Class, Reason, Stacktrace])
+         end || {Process, _Ref, ProcessState} <- ets:tab2list(TID)],
     {reply, ok, State};
 handle_call({notify_members, Notification}, _From, State) ->
     #process_group_state{table_id = TID} = State,
