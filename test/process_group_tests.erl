@@ -18,8 +18,7 @@
 %% =============================================================================
 -ifdef(TEST).
 
--define(DEFAULT_GROUPS, [default_logger_group,
-                         perfmon_logger_group]).
+-define(DEFAULT_GROUPS, [default_logger_group]).
 
 crud_test() ->
     setup(),
@@ -58,27 +57,8 @@ crud_test() ->
 
 members_test() ->
     setup(),
-    MemberFun =
-        fun(Fun, ReceivedMessages) ->
-            receive
-                {join, Group} ->
-                    ok = process_group:join(Group),
-                    Fun(Fun, ReceivedMessages);
-                {leave, Group} ->
-                    ok = process_group:leave(Group),
-                    Fun(Fun, ReceivedMessages);
-                {get_received_messages, PID} ->
-                    PID ! {received_messages, ReceivedMessages},
-                    Fun(Fun, ReceivedMessages);
-                stop ->
-                    ok;
-                Msg ->
-                    NewReceivedMessages = ReceivedMessages ++ [Msg],
-                    Fun(Fun, NewReceivedMessages)
-            end
-        end,
-    Member1 = spawn_link(fun() -> MemberFun(MemberFun, []) end),
-    Member2 = spawn_link(fun() -> MemberFun(MemberFun, []) end),
+    Member1 = start_member(),
+    Member2 = start_member(),
 
     ok = check_members(g1, {error, {no_such_group, g1}}),
     ok = check_members(g2, {error, {no_such_group, g2}}),
@@ -90,16 +70,16 @@ members_test() ->
     ok = process_group:create(g1),
     ok = process_group:create(g2),
 
-    Member1 ! {join, g1},
-    Member2 ! {join, g1},
-    Member2 ! {join, g2},
+    ok = process_group:join(g1, Member1),
+    ok = process_group:join(g1, Member2),
+    ok = process_group:join(g2, Member2),
 
     % check if group membership is correct
     ok = check_members(g1, [Member1, Member2]),
     ok = check_members(g2, [Member2]),
 
     % no duplicate membership
-    Member2 ! {join, g2},
+    ok = process_group:join(g2, Member2),
     ok = check_members(g2, [Member2]),
 
     ok = process_group:notify_members(g1, notification1),
@@ -111,7 +91,7 @@ members_test() ->
     ok = check_received_messages(Member2, [notification1, notification2]),
 
     % one of the processes leaves the group
-    Member2 ! {leave, g1},
+    ok = process_group:leave(g1, Member2),
     ?LOOPER(fun() ->
                 ?assertNot(lists:member(Member2, process_group:get_members(g1)))
             end,
@@ -137,14 +117,69 @@ members_test() ->
     ok = check_received_messages(Member1, [notification1, notification3, notification5]),
     ok = check_received_messages(Member2, [notification1, notification2]),
 
-    Member1 ! stop,
-    Member2 ! stop,
-    ?WAIT_FOR_PROCESS_STOPPED(Member1),
-    ?WAIT_FOR_PROCESS_STOPPED(Member2).
+    ok = stop_member(Member1),
+    ok = stop_member(Member2).
+
+members_notify_fun_test() ->
+    setup(),
+    Member1 = start_member(),
+    Member2 = start_member(),
+    Member3 = start_member(),
+    Member4 = start_member(),
+
+    ok = process_group:create(ng),
+
+    ok = process_group:join(ng, Member1, #{value => 5}),
+    ok = process_group:join(ng, Member2, #{reply => false}),
+    ok = process_group:join(ng, Member3),   % notification function for this process will fail because of state badmatch
+    ok = process_group:join(ng, Member4, #{value => 7}),
+
+    ok = process_group:notify_members(ng, fun(PID, State) ->
+            case maps:get(reply, State, true) of
+                true ->
+                    Value = maps:get(value, State),
+                    PID ! {value, Value},
+                    ok;
+                _ ->
+                    ok
+            end
+        end),
+    ok = check_received_messages(Member1, [{value, 5}]),
+    ok = check_received_messages(Member2, []),
+    ok = check_received_messages(Member3, []),
+    ok = check_received_messages(Member4, [{value, 7}]),
+
+    ok = process_group:delete(ng),
+
+    ok = stop_member(Member1),
+    ok = stop_member(Member2),
+    ok = stop_member(Member3),
+    ok = stop_member(Member4).
+
 
 %% =============================================================================
 %% Tests
 %% =============================================================================
+
+start_member() ->
+    MemberFun =
+        fun(Fun, ReceivedMessages) ->
+            receive
+                {get_received_messages, PID} ->
+                    PID ! {received_messages, ReceivedMessages},
+                    Fun(Fun, ReceivedMessages);
+                stop ->
+                    ok;
+                Msg ->
+                    NewReceivedMessages = ReceivedMessages ++ [Msg],
+                    Fun(Fun, NewReceivedMessages)
+            end
+        end,
+    spawn_link(fun() -> MemberFun(MemberFun, []) end).
+
+stop_member(PID) ->
+    PID ! stop,
+    ?WAIT_FOR_PROCESS_STOPPED(PID).
 
 check_members(Group, ExpectedResult) when is_tuple(ExpectedResult) ->
     ?LOOPER(

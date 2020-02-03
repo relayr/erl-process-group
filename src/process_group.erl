@@ -57,6 +57,15 @@
 %%------------------------------------------------------------------------------
 -define(SUPERVISOR,    process_group_supervisor).
 
+%%------------------------------------------------------------------------------
+%% Types
+%%------------------------------------------------------------------------------
+-type notify_fun() :: fun((Process :: pid(), ProcessState :: any()) -> ok).
+
+-export_type([
+    notify_fun/0
+]).
+
 %% =============================================================================
 %% Exported functions
 %% =============================================================================
@@ -143,8 +152,8 @@ count_members(GroupName) ->
             {error, {no_such_group, GroupName}}
     end.
 
-%% @doc Send notification to all members of a given group.
--spec notify_members(GroupName :: atom(), Notification :: any()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
+%% @doc Send notification to all members of a given group or execute notification function on each of them.
+-spec notify_members(GroupName :: atom(), Notification :: notify_fun() | any()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
 notify_members(GroupName, Notification) ->
     try
         gen_server:call(GroupName, {notify_members, Notification})
@@ -193,6 +202,10 @@ handle_call(count_members, _From, State) ->
     #process_group_state{table_id = TID} = State,
     Size = ets:info(TID, size),
     {reply, Size, State};
+handle_call({notify_members, Notification}, _From, State) when is_function(Notification) ->
+    #process_group_state{table_id = TID} = State,
+    _ = [catch Notification(Process, ProcessState) || {Process, _Ref, ProcessState} <- ets:tab2list(TID)],
+    {reply, ok, State};
 handle_call({notify_members, Notification}, _From, State) ->
     #process_group_state{table_id = TID} = State,
     _ = [Process ! Notification || {Process, _Ref, _ProcessState} <- ets:tab2list(TID)],
