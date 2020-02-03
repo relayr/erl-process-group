@@ -26,19 +26,26 @@ Add new process to specified group
 ok
 ```
 
+#### join/3
+Add new process to specified group and attach some static process state to it.
+```
+4> process_group:join(my_group, PID, #{reply => true}).
+ok
+```
+
 #### get_members/1
 Get members of process group
 ```
-4> process_group:get_members(my_group).
+5> process_group:get_members(my_group).
 [<0.170.0>]
 ```
 
 #### notify_members/2
 Send message to all processes in specific group
 ```
-5> process_group:notify_members(my_group, {data, [test_msg]}).
+6> process_group:notify_members(my_group, {data, [test_msg]}).
 ok
-6> flush().
+7> flush().
 Shell got {data,[test_msg]}
 ok
 ```
@@ -46,13 +53,13 @@ ok
 #### leave/1,2
 Remove process from specific group
 ```
-7> process_group:leave(my_group, PID).
+8> process_group:leave(my_group, PID).
 ok
 ```
 
 #### delete/1
 Delete process group
 ```
-8> process_group:delete(my_group).
+9> process_group:delete(my_group).
 ok
 ```

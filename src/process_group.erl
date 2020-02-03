@@ -21,6 +21,7 @@
     delete/1,
     join/1,
     join/2,
+    join/3,
     leave/1,
     leave/2,
     get_members/1,
@@ -95,8 +96,13 @@ join(GroupName) ->
 %% @doc Join process to given group.
 -spec join(GroupName :: atom(), Process :: pid() | atom()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
 join(GroupName, Process) ->
+    join(GroupName, Process, undefined).
+
+%% @doc Join process to given group.
+-spec join(GroupName :: atom(), Process :: pid() | atom(), ProcessState :: any()) -> Result :: ok | {error, {no_such_group, GroupName :: atom()}}.
+join(GroupName, Process, ProcessState) ->
     try
-        gen_server:call(GroupName, {join, Process})
+        gen_server:call(GroupName, {join, Process, ProcessState})
     catch
         exit:{noproc, _} ->
             {error, {no_such_group, GroupName}}
@@ -150,7 +156,7 @@ notify_members(GroupName, Notification) ->
 %% @doc Return all groups.
 -spec which_groups() -> GroupNames :: [atom()].
 which_groups() ->
-    [GroupName || {GroupName, _PID, worker, [process_group]} <- supervisor:which_children(process_group_supervisor)].
+    [GroupName || {GroupName, _PID, worker, [process_group]} <- supervisor:which_children(?SUPERVISOR)].
 
 %% =============================================================================
 %% gen_server behaviour functions
@@ -163,17 +169,17 @@ init([GroupName]) ->
     {ok, State}.
 
 %% @private
-handle_call({join, Process}, _From, State) ->
+handle_call({join, Process, ProcessState}, _From, State) ->
     #process_group_state{table_id = TID} = State,
     Ref = erlang:monitor(process, Process),
-    true = ets:insert(TID, {Process, Ref}),
+    true = ets:insert(TID, {Process, Ref, ProcessState}),
     {reply, ok, State};
 handle_call({leave, Process}, _From, State) ->
     #process_group_state{table_id = TID} = State,
     case ets:lookup(TID, Process) of
         [] ->
             ok;
-        [{Process, Ref}] ->
+        [{Process, Ref, _ProcessState}] ->
             true = erlang:demonitor(Ref, [flush]),
             true = ets:delete(TID, Process),
             ok
@@ -181,7 +187,7 @@ handle_call({leave, Process}, _From, State) ->
     {reply, ok, State};
 handle_call(get_members, _From, State) ->
     #process_group_state{table_id = TID} = State,
-    Processes = [Process || {Process, _Ref} <- ets:tab2list(TID)],
+    Processes = [Process || {Process, _Ref, _ProcessState} <- ets:tab2list(TID)],
     {reply, Processes, State};
 handle_call(count_members, _From, State) ->
     #process_group_state{table_id = TID} = State,
@@ -189,7 +195,7 @@ handle_call(count_members, _From, State) ->
     {reply, Size, State};
 handle_call({notify_members, Notification}, _From, State) ->
     #process_group_state{table_id = TID} = State,
-    _ = [Process ! Notification || {Process, _Ref} <- ets:tab2list(TID)],
+    _ = [Process ! Notification || {Process, _Ref, _ProcessState} <- ets:tab2list(TID)],
     {reply, ok, State}.
 
 %% @private
