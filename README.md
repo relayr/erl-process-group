@@ -1,6 +1,6 @@
 # process_group
 
-[![Build Status](https://travis-ci.org/relayr/erl-process-group.svg?branch=master)](https://travis-ci.org/relayr/erl-process-group) [![Coverage Status](https://coveralls.io/repos/github/relayr/erl-process-group/badge.svg?branch=master)](https://coveralls.io/github/relayr/erl-process-group?branch=master)
+[![Build Status](https://img.shields.io/github/workflow/status/relayr/erl-process-group/Erlang%20CI)](https://github.com/relayr/erl-process-group/actions?query=workflow%3A%22Erlang+CI%22) [![Hex.pm](https://img.shields.io/hexpm/v/process_group.svg?style=flat)](https://hex.pm/packages/process_group) [![Coverage Status](https://coveralls.io/repos/github/relayr/erl-process-group/badge.svg?branch=master)](https://coveralls.io/github/relayr/erl-process-group?branch=master)
 
 Application for managing of distributed process groups with API compatible with [OTP 'pg2' module](http://erlang.org/doc/man/pg2.html).
 
